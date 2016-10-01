@@ -59,27 +59,8 @@ p_iterators_array<2> eucledian_closest(T &points, int size) {
 }
 
 template<std::size_t SIZE>
-p_iterators_array<2> closest_side_pair(p_iterator<SIZE> points_iterator, p_iterator<SIZE> x_arr_iterator, p_iterator<SIZE> y_arr_iterator) {
-    std::size_t delimeter = SIZE / 2 ;
-    if(delimeter <= 3) {
-      return eucledian_closest(points_iterator, delimeter);
-    }
-    p_iterators_array<2> closest_left, closest_right, result;
-
-    closest_left = closest_side_pair<SIZE / 2>(points_iterator, x_arr_iterator, y_arr_iterator);
-    closest_right = closest_side_pair<SIZE / 2>(points_iterator + delimeter, x_arr_iterator + delimeter, y_arr_iterator + delimeter);
-
-    if(calculate_distance(*(closest_left.front()), *(closest_left.back())) < calculate_distance(*(closest_right.front()), *(closest_right.back()))) {
-      result = closest_left;
-    } else {
-      result = closest_right;
-    }
-    return result;
-}
-
-template<std::size_t SIZE>
 p_iterators_array<2> closest_split_pair(p_iterator<SIZE> points_iterator, p_iterators_array<2> &closest_side_pairs) {
-    std::vector<typename std::array<Point, SIZE>::iterator> split_pairs;
+    std::vector<p_iterator<SIZE>> split_pairs;
     p_iterators_array<2> final_result;
     double closest_distance = DBL_MAX, distance = 0.0;
 
@@ -110,6 +91,27 @@ p_iterators_array<2> closest_split_pair(p_iterator<SIZE> points_iterator, p_iter
     }
     return final_result;
 }
+
+template<std::size_t SIZE>
+p_iterators_array<2> closest_side_pair(p_iterator<SIZE> points_iterator, p_iterator<SIZE> x_arr_iterator, p_iterator<SIZE> y_arr_iterator) {
+    std::size_t delimeter = SIZE / 2 ;
+    if(delimeter <= 3) {
+      return eucledian_closest(points_iterator, delimeter);
+    }
+    p_iterators_array<2> closest_left, closest_right, result;
+
+    closest_left = closest_side_pair<SIZE / 2>(points_iterator, x_arr_iterator, y_arr_iterator);
+    closest_right = closest_side_pair<SIZE / 2>(points_iterator + delimeter, x_arr_iterator + delimeter, y_arr_iterator + delimeter);
+
+    if(calculate_distance(*(closest_left.front()), *(closest_left.back())) < calculate_distance(*(closest_right.front()), *(closest_right.back()))) {
+      result = closest_left;
+    } else {
+      result = closest_right;
+    }
+    return closest_split_pair<SIZE>(points_iterator, result);
+}
+
+
 
 int main()
 {
